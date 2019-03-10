@@ -7,6 +7,8 @@ Features:
 - Status log handler
 - Multiprocess log handler
 
+[Full Documentation](https://starlog.readthedocs.io/en/latest/)
+
 ## Examples
 
 ### Status Logger

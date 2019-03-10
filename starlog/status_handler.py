@@ -61,22 +61,35 @@ class StatusHandler(logging.Handler):
 
         import logging
         import starlog
+        import sys
+        import time
 
-        handler = starlog.StatusHandler()
-        formatter = logging.Formatter('Seen info messages: %(INFO)d'
 
-        log.info('you will not see this message - just the status')
+        formatter = logging.Formatter('Seen info messages: %(INFO)d')
+        handler = starlog.StatusHandler('1s')
+        logging.root.addHandler(handler)
+        logging.root.setLevel(logging.DEBUG)
+
+        stdout = logging.StreamHandler(sys.stdout)
+        stdout.setFormatter(formatter)
+        logging.getLogger('starlog.status').addHandler(stdout)
+
+        logging.root.info('you will not see this message - just the status')
+
+        time.sleep(5)
 
         # output is:
         >>> Seen info messages: 1
-
-        # and 5 seconds later:
+        >>> Seen info messages: 0
+        >>> Seen info messages: 0
+        >>> Seen info messages: 0
         >>> Seen info messages: 0
     """
     def __init__(self, interval='5s', logger='starlog.status'):
         logging.Handler.__init__(self)
         self._metrics = metric_collection
 
+        self._logger_name = logger
         self._async_reporter = self._start_reporter_thread(
             interval=interval,
             logger=logging.getLogger(logger))
@@ -86,6 +99,9 @@ class StatusHandler(logging.Handler):
         The actual log record does not generate any direct output with this log
         handler. For this you must configure the logger ``starlog.status``
         """
+        if record.name == self._logger_name:
+            # if status logger was not configured with 'propagate=0'
+            return
         self._count_messages(record)
         self._count_custom_metrics(record)
 

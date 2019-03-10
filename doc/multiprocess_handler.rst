@@ -10,13 +10,19 @@ to handle all log messages to a target log handler, like a file or syslog.
 It depends on the way you created the sub-process to choose the right log handler.
 Here's a short overview:
 
-+------
-| Sub-Process Created By |
-+========================+
-| os.fork()
-| multiprocessing.Process()
-| multiprocessing.Process() in "spawn" mode
-+---------------------------------------------+
++----------------------------------------------------+----------------------------------+
+| Sub-Process Created By                             | Compatible Log Handler           |
++====================================================+==================================+
+| os.fork()                                          | ``starlog.ZmqPushPullHandler``   |
++----------------------------------------------------+----------------------------------+
+| multiprocessing.Process()                          | ``starlog.MultiprocessHandler``, |
+|                                                    | ``flexlog.ZmqPushPullHandler``   |
++----------------------------------------------------+----------------------------------+
+| multiprocessing.Process() in "spawn" mode          | ``starlog.ZmqPushPullHandler``   |
++----------------------------------------------------+----------------------------------+
 
-.. automodule:: starlog.multiprocess_handler
+.. autoclass:: starlog.MultiprocessHandler
+    :members:
+
+.. autoclass:: starlog.ZmqPushPullHandler
     :members:
