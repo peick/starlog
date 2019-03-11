@@ -10,16 +10,16 @@ to handle all log messages to a target log handler, like a file or syslog.
 It depends on the way you created the sub-process to choose the right log handler.
 Here's a short overview:
 
-+----------------------------------------------------+----------------------------------+
-| Sub-Process Created By                             | Compatible Log Handler           |
-+====================================================+==================================+
-| os.fork()                                          | ``starlog.ZmqPushPullHandler``   |
-+----------------------------------------------------+----------------------------------+
-| multiprocessing.Process()                          | ``starlog.MultiprocessHandler``, |
-|                                                    | ``flexlog.ZmqPushPullHandler``   |
-+----------------------------------------------------+----------------------------------+
-| multiprocessing.Process() in "spawn" mode          | ``starlog.ZmqPushPullHandler``   |
-+----------------------------------------------------+----------------------------------+
++----------------------------------------------------+------------------------------------------+
+| Sub-Process Created By                             | Compatible Log Handler                   |
++====================================================+==========================================+
+| os.fork()                                          | :py:class:`starlog.ZmqPushPullHandler`   |
++----------------------------------------------------+------------------------------------------+
+| multiprocessing.Process()                          | :py:class:`starlog.MultiprocessHandler`, |
+|                                                    | :py:class:`flexlog.ZmqPushPullHandler`   |
++----------------------------------------------------+------------------------------------------+
+| multiprocessing.Process() in "spawn" mode          | :py:class:`starlog.ZmqPushPullHandler`   |
++----------------------------------------------------+------------------------------------------+
 
 .. autoclass:: starlog.MultiprocessHandler
     :members:

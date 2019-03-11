@@ -3,9 +3,32 @@ It generates a log message in regular intervals.
 
 Metrics that are collected:
 
-- the number of messages per log level, available in formatter as ``%(INFO)d``
+- the number of messages per log level, available in formatter as:
+
+  - ``%(DEBUG)d``
+  - ``%(INFO)d``
+  - ``%(WARN)d``
+  - ``%(ERROR)d``
+  - ``%(FATAL)d``
+
 - the size of messages per log level, available in formatter as
-    ``%(INFO-SIZE)d``
+
+  - ``%(DEBUG-SIZE)d``
+  - ``%(INFO-SIZE)d``
+  - ``%(WARN-SIZE)d``
+  - ``%(ERROR-SIZE)d``
+  - ``%(FATAL-SIZE)d``
+
+- custom values examples::
+
+    from starlog import inc
+    logger.info('one more log line', extra=inc('requests').inc('2xx'))
+    logger.info('bad request', extra=inc('4xx').update(error='Invalid input'))
+
+  - ``%(requests)d``
+  - ``%(2xx)d``
+  - ``%(4xx)d``
+
 
 Use case: write out status logs every some seconds to standard out and sent
 full logs to syslog or a file.
@@ -56,6 +79,13 @@ def _parse_interval(value):
 class StatusHandler(logging.Handler):
     """StatusHandler is a log handler that aggregates log messages and
     generates a status log message in regular intervals.
+
+    :param str interval: the log status interval. Values must be of the format
+        **Xs** (seconds), **Xm** (minutes) or **Xh** (hours), where **X** is
+        a positive integer value. If you pass an integer instead of a string,
+        then this value is taken as the number of seconds.
+        Examples: **15s**, **5m**, **1h**
+    :type interval: str or int
 
     Example::
 
