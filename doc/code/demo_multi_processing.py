@@ -79,8 +79,8 @@ def main_loop_with_multiprocessing_process():
 def _join_processes(px):
     # if MultiprocessHandler parameter manager_queue is set to False,
     # then this is the pattern to join exited processes. The reason is,
-    # multiprocessing.Queue blocks the process at p.join forever although it
-    # leaves the run method.
+    # multiprocessing.Queue sometimes blocks the process at p.join forever
+    # although it left the run method.
     px[0].join(T + 1)
 
     for p in px:

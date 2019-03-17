@@ -26,7 +26,7 @@ Execute with ``python doc/code/demo_multi_processing.py --zmq``
 code/demo_multi_processing.py
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. literalinclude:: code/demo_status_handler.py
+.. literalinclude:: code/demo_multi_processing.py
    :language: python
 
 code/logging_zmq.conf
