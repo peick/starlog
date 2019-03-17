@@ -1,0 +1,18 @@
+==> app.log <==
+2019-03-17 15:46:39 [22283:gunicorn.error:271] [INFO] Starting gunicorn 19.9.0
+2019-03-17 15:46:39 [22283:gunicorn.error:271] [INFO] Listening at: http://127.0.0.1:8000 (22283)
+2019-03-17 15:46:39 [22283:gunicorn.error:271] [INFO] Using worker: sync
+2019-03-17 15:46:39 [22291:gunicorn.error:271] [INFO] Booting worker with pid: 22291
+2019-03-17 15:46:39 [22291:app:17] [INFO] my app is starting
+
+==> status.log <==
+2019-03-17 15:47:09,927 log messages: 0 CRITICAL, 0 ERROR, 0 WARNING 5 INFO, 0 DEBUG.
+2019-03-17 15:47:39,963 log messages: 0 CRITICAL, 0 ERROR, 0 WARNING 0 INFO, 0 DEBUG.
+
+==> app.log <==
+2019-03-17 15:47:54 [22283:gunicorn.error:271] [INFO] Handling signal: int
+2019-03-17 15:47:54 [22291:gunicorn.error:271] [INFO] Worker exiting (pid: 22291)
+2019-03-17 15:47:54 [22283:gunicorn.error:271] [INFO] Shutting down: Master
+
+==> status.log <==
+2019-03-17 15:47:55,983 log messages: 0 CRITICAL, 0 ERROR, 0 WARNING 3 INFO, 0 DEBUG.

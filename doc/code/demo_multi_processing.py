@@ -42,14 +42,41 @@ def log_process():
         pass
 
 
-def main_loop():
+def main_loop_with_os_fork():
     print("starting main loop")
+
+    pids = []
+
+    for ti in range(N):
+        pid = os.fork()
+        if pid == 0:
+            log_process()
+            return
+
+        pids.append(pid)
+
+    _waitpids(pids)
+
+
+def _waitpids(pids):
+    for pid in pids:
+        os.waitpid(pid, 0)
+
+
+def main_loop_with_multiprocessing_process():
+    print("starting main loop")
+
     px = []
+
     for ti in range(N):
         p = multiprocessing.Process(target=log_process)
         p.start()
         px.append(p)
 
+    _join_processes(px)
+
+
+def _join_processes(px):
     # if MultiprocessHandler parameter manager_queue is set to False,
     # then this is the pattern to join exited processes. The reason is,
     # multiprocessing.Queue blocks the process at p.join forever although it
@@ -79,7 +106,7 @@ def get_cli_args():
         '--zmq',
         action='store_true',
         default=False,
-        help='use starlog.ZmqPushPullHandler. If not set, then ' +
+        help='use starlog.ZmqHandler. If not set, then ' +
              'starlog.MultiprocessHandler is used. ')
     parser.add_argument(
         '--duration',
@@ -91,6 +118,12 @@ def get_cli_args():
         type=int,
         default=5,
         help='The number of processes to start')
+    parser.add_argument(
+        '--fork',
+        action='store_true',
+        default=False,
+        help='Use os.fork() to create a sub process. Default: use ' +
+             'multiprocessing.Process')
 
     return parser.parse_args()
 
@@ -120,7 +153,14 @@ def main():
 
     print("using %s" % basename)
 
-    main_loop()
+    if args.fork:
+        if not args.zmq:
+            print('\nWARNING: the combination of os.fork and ' +
+                  'starlog.MultiprocessHandler is not reliable and thus not ' +
+                  'recommend\n')
+        main_loop_with_os_fork()
+    else:
+        main_loop_with_multiprocessing_process()
 
 
 if __name__ == '__main__':

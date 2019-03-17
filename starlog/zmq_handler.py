@@ -1,3 +1,4 @@
+import errno
 import os
 import threading
 import traceback
@@ -8,47 +9,187 @@ import zmq
 from .base_handler import BaseMultiprocessHandler
 from .debug import get_debug_logger
 from .serializer import record_to_dict
+from .utils import retry, RetryAbortedByCheck
 
 
-_log = get_debug_logger('starlog.debug.queue_handler')
+_log = get_debug_logger('starlog.debug.zmq_handler')
 
 
-class ZmqPushPullHandler(BaseMultiprocessHandler):
-    """The ZmqPushPullHandler creates a zmq connection between the master
-    process and the child processes. The master process establishes a
+class BindFailedError(Exception):
+    pass
+
+
+class RobustZmqSocket(object):
+    UNRECOVERABLE_ERRORS = [
+        # "Permission denied"
+        errno.EACCES,
+    ]
+
+    DEFAULT_SOCKET_OPTIONS = {
+        # set recv timeout
+        'RCVTIMEO': 1000,
+        'LINGER': 0,
+    }
+
+    def __init__(self, socket_type, address, backoff_factor=2.0, tries=8,
+                 check=None, socket_options=DEFAULT_SOCKET_OPTIONS):
+        # default: tries up to 4 minutes 15 seconds to bind / connect to
+        # a socket
+        self._socket_type = socket_type
+        self._address = address
+
+        self._context = None
+        self._socket = None
+        self._socket_options = socket_options
+
+        self._retry_bind = retry(
+            zmq.ZMQError,
+            tries=tries,
+            backoff_factor=backoff_factor,
+            check=check,
+            retry_log=self._log_bind_attempt)
+
+        self._retry_connect = retry(
+            zmq.ZMQError,
+            tries=tries,
+            backoff_factor=backoff_factor,
+            check=check,
+            retry_log=self._log_bind_attempt)
+
+    def _obtain_context(self):
+        if self._context is None:
+            self._context = zmq.Context()
+
+        return self._context
+
+    def _log_bind_attempt(self, _trial, last_trial=False):
+        if last_trial:
+            _log.error('bind to %s failed. Aborting.', self._address)
+        else:
+            _log.warning('bind to %s failed. Retrying', self._address)
+
+    def _log_connect_attempt(self, _trial, last_trial=False):
+        if last_trial:
+            _log.error('connect to %s failed. Aborting.', self._address)
+        else:
+            _log.warning('connect to %s failed. Retrying.', self._address)
+
+    def bind(self):
+        bind_with_retries = self._retry_bind(self._bind)
+        bind_with_retries()
+
+    def _bind(self):
+        try:
+            self.close_socket()
+            context = self._obtain_context()
+            self._socket = context.socket(self._socket_type)
+
+            self._socket.bind(self._address)
+
+            self._set_socket_options()
+        except zmq.ZMQError as error:
+            if error.errno in self.UNRECOVERABLE_ERRORS:
+                raise BindFailedError(str(error))
+
+            raise
+
+    def connect(self):
+        connect_with_retries = self._retry_connect(self._connect)
+        connect_with_retries()
+
+    def _connect(self):
+        self.close_socket()
+        context = self._obtain_context()
+        self._socket = context.socket(self._socket_type)
+        self._socket.connect(self._address)
+
+    def _set_socket_options(self):
+        if not self._socket_options:
+            return
+
+        for option, value in self._socket_options.items():
+            setattr(self._socket, option, value)
+
+    def recv_json(self):
+        try:
+            return self._socket.recv_json()
+        except zmq.ZMQError as error:
+            if error.errno == errno.EAGAIN:
+                # recv timeout
+                return
+
+            self.bind()
+
+    def send_json(self, data):
+        try:
+            return self._socket.send_json(data)
+        except zmq.ZMQError:
+            self.connect()
+            return self._socket.send_json(data)
+
+    def close(self):
+        """Close the zmq socket and destroy context.
+        """
+        self.close_socket()
+        self.destroy_context()
+
+    def destroy_context(self):
+        """Destroy the zmq context.
+        """
+        if self._context is not None:
+            if not self._context.closed:
+                self._context.destroy()
+            self._context = None
+
+    def close_socket(self):
+        """Close the zmq socket.
+        """
+        if self._socket is not None:
+            if not self._socket.closed:
+                self._socket.close()
+            self._socket = None
+
+
+class ZmqHandler(BaseMultiprocessHandler):
+    """The ZmqHandler creates a zmq connection between the main
+    process and its children processes. The main process establishes a
     :py:const:`zmq.PULL` socket. Child processes sets up a :py:const:`zmq.PUSH`
-    connection.
+    socket.
 
-    All subprocesses sends messages to the zmq connection by using the `emit`
-    method. A background thread in the main process retrieves these messages
-    and pushes them back to the logging system as if they were generated by
-    the main process.
+    All subprocesses sends messages to the zmq connection in the `emit`
+    method. A background thread of the main process retrieves these messages
+    and delegates them to the ``logger`` (default: ``starlog.sink``) in the
+    main process.
 
-    The ZmqPushPullHandler is expected to be set up by the main process.
+    The ZmqHandler is expected to be set up by the main process.
 
     :param str address: the address of the connection which is passed to
         :py:meth:`zmq.Socket.connect` / :py:meth:`zmq.Socket.bind`.
+        Examples: ``tcp://127.0.0.1:12345``, ``ipc:///tmp/log.sock``
     :param str logger: name of the logger where log records are send to in the
-        master process.
+        main process.
     """
 
     def __init__(self, address='tcp://127.0.0.1:5557',
                  logger='starlog.logsink'):
         BaseMultiprocessHandler.__init__(self, logger)
 
+        self._sender_socket_type = zmq.PUSH
+        self._receiver_socket_type = zmq.PULL
+
         self._address = address
         self._async_listener = self._start_listener_thread(address)
 
-        # for child processes
+        # for children processes
         self._pid = None
 
     def _start_listener_thread(self, address):
-        _log.info('MultiprocessHandler._start_listener_thread')
-        listener = ZmqPullListenerThread(address, self)
+        _log.info('ZmqHandler._start_listener_thread')
+        listener = ZmqListenerThread(self._receiver_socket_type, address, self)
         listener.start()
         return listener
 
-    def forward_to_master(self, record):
+    def forward_to_main(self, record):
         socket = self._get_socket()
         record_dict = record_to_dict(record, self)
         socket.send_json(record_dict)
@@ -57,37 +198,20 @@ class ZmqPushPullHandler(BaseMultiprocessHandler):
         pid = os.getpid()
 
         if self._pid != pid:
-            # pid is None: new child forked from master
+            # pid is None: new child forked from main
             # pid != os.getpid(): new child forked from other child
-            self._bind_to_socket()
+            self._client_bind_to_socket()
             self._pid = pid
 
         return self._socket
 
-    def _bind_to_socket(self):
-        context = zmq.Context()
-        socket = context.socket(zmq.PUSH)
-        socket.connect(self._address)
+    def _client_bind_to_socket(self):
+        socket = RobustZmqSocket(self._sender_socket_type, self._address)
+        socket.connect()
 
         self._socket = socket
 
-    def __del__(self):
-        _log.info('MultiprocessHandler.__del__ for %s', self)
-
-        if not self._is_master_process():
-            self.close()
-
-        listener_thread = self._async_listener
-        if listener_thread is None:
-            return
-
-        listener_thread.shutdown()
-        listener_thread.join()
-
-        self.close()
-
-    def close(self):
-        BaseMultiprocessHandler.close(self)
+    def _close_socket(self):
         try:
             socket = self._socket
         except AttributeError:
@@ -97,43 +221,69 @@ class ZmqPushPullHandler(BaseMultiprocessHandler):
                 socket.close()
                 self._socket = None
 
+    def close(self):
+        _log.info('ZmqHandler.close for %s', self)
+        BaseMultiprocessHandler.close(self)
+
+        try:
+            if not self._is_main_process():
+                return
+
+            listener_thread = self._async_listener
+            if listener_thread is None:
+                return
+
+            listener_thread.shutdown()
+            listener_thread.join()
+        finally:
+            self._close_socket()
+
 
 class ZmqListenerThread(threading.Thread):
-    def __init__(self, address, handler, *args, **kwargs):
+    def __init__(self, socket_type, address, handler, *args, **kwargs):
         super(ZmqListenerThread, self).__init__(*args, **kwargs)
         self.setDaemon(True)
 
-        self._address = address
         self._handler = handler
         self._running = True
 
-    def run(self):
-        socket = self._bind_to_socket(self._address)
+        self._zmq_socket = RobustZmqSocket(
+            socket_type, address, check=self._not_running)
 
+    def _not_running(self):
+        return not self._running
+
+    def run(self):
         try:
+            self._zmq_socket.bind()
+
             while self._running:
-                record_dict = socket.recv_json()
+                record_dict = self._zmq_socket.recv_json()
+                if record_dict is None:
+                    # receive timeout
+                    continue
+
                 self._process_record(record_dict)
+        except RetryAbortedByCheck:
+            # zmq bind failed and thread stopped running
+            pass
         except Exception:
-            _log.warn('exception in %s.run: %s',
-                      self.__class__.__name__, traceback.format_exc())
+            _log.warning('exception in %s.run: %s',
+                         self.__class__.__name__, traceback.format_exc())
 
         _log.info('%s stopped', self.__class__.__name__)
-
-    def _bind_to_socket(self, address):
-        raise NotImplementedError()
+        self.close()
 
     def _process_record(self, record_dict):
         record = makeLogRecord(record_dict)
         self._handler.forward_to_sink(record)
 
+    def close(self):
+        """Close the zmq socket connection.
+        """
+        self._zmq_socket.close()
+
     def shutdown(self):
+        """Gracful shutdown.
+        """
         self._running = False
-
-
-class ZmqPullListenerThread(ZmqListenerThread):
-    def _bind_to_socket(self, address):
-        context = zmq.Context()
-        socket = context.socket(zmq.PULL)
-        socket.bind(self._address)
-        return socket

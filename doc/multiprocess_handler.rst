@@ -13,16 +13,16 @@ Here's a short overview:
 +----------------------------------------------------+------------------------------------------+
 | Sub-Process Created By                             | Compatible Log Handler                   |
 +====================================================+==========================================+
-| os.fork()                                          | :py:class:`starlog.ZmqPushPullHandler`   |
+| os.fork()                                          | :py:class:`starlog.ZmqHandler`           |
 +----------------------------------------------------+------------------------------------------+
 | multiprocessing.Process()                          | :py:class:`starlog.MultiprocessHandler`, |
-|                                                    | :py:class:`flexlog.ZmqPushPullHandler`   |
+|                                                    | :py:class:`flexlog.ZmqHandler`           |
 +----------------------------------------------------+------------------------------------------+
-| multiprocessing.Process() in "spawn" mode          | :py:class:`starlog.ZmqPushPullHandler`   |
+| multiprocessing.Process() in "spawn" mode          | :py:class:`starlog.ZmqHandler`           |
 +----------------------------------------------------+------------------------------------------+
 
 .. autoclass:: starlog.MultiprocessHandler
     :members:
 
-.. autoclass:: starlog.ZmqPushPullHandler
+.. autoclass:: starlog.ZmqHandler
     :members:

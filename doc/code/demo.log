@@ -1,0 +1,166 @@
+
++--------------------------------------------------------------------------
+|   starlog.MultiprocessHandler
++--------------------------------------------------------------------------
+
+configuring logging
+using logging_multiprocess.conf
+starting main loop
+2019-03-17 14:39:47 [__main__-20200] ERROR: testing error logging
+2019-03-17 14:39:47 [__main__-20201] INFO: testing info logging
+2019-03-17 14:39:47 [__main__-20204] WARNING: testing warning logging
+2019-03-17 14:39:47 [__main__-20205] ERROR: testing error logging
+2019-03-17 14:39:47 [__main__-20202] INFO: testing info logging
+2019-03-17 14:39:48 [__main__-20202] ERROR: testing error logging
+2019-03-17 14:39:48 [__main__-20200] WARNING: testing warning logging
+2019-03-17 14:39:48 [__main__-20204] WARNING: testing warning logging
+2019-03-17 14:39:48 [__main__-20201] INFO: testing info logging
+2019-03-17 14:39:48 [__main__-20200] ERROR: testing error logging
+2019-03-17 14:39:48 [__main__-20205] WARNING: testing warning logging
+2019-03-17 14:39:48 [__main__-20202] ERROR: testing error logging
+2019-03-17 14:39:49 [__main__-20202] WARNING: testing warning logging
+2019-03-17 14:39:49 [__main__-20201] WARNING: testing warning logging
+2019-03-17 14:39:49 [__main__-20200] INFO: testing info logging
+2019-03-17 14:39:49 [__main__-20204] WARNING: testing warning logging
+2019-03-17 14:39:49 [__main__-20205] INFO: testing info logging
+2019-03-17 14:39:49 [__main__-20204] ERROR: testing error logging
+2019-03-17 14:39:49 [__main__-20200] INFO: testing info logging
+2019-03-17 14:39:49 [__main__-20202] INFO: testing info logging
+2019-03-17 14:39:49 [__main__-20202] INFO: testing info logging
+2019-03-17 14:39:49 [__main__-20201] WARNING: testing warning logging
+2019-03-17 14:39:49 [__main__-20202] INFO: testing info logging
+2019-03-17 14:39:49 [__main__-20202] INFO: testing info logging
+2019-03-17 14:39:49 [__main__-20201] WARNING: testing warning logging
+2019-03-17 14:39:50 [__main__-20204] WARNING: testing warning logging
+2019-03-17 14:39:50 [__main__-20204] INFO: testing info logging
+2019-03-17 14:39:50 [__main__-20200] WARNING: testing warning logging
+2019-03-17 14:39:50 [__main__-20201] INFO: testing info logging
+2019-03-17 14:39:50 [__main__-20202] WARNING: testing warning logging
+2019-03-17 14:39:50 [__main__-20205] INFO: testing info logging
+2019-03-17 14:39:50 [__main__-20202] ERROR: testing error logging
+2019-03-17 14:39:50 [__main__-20204] WARNING: testing warning logging
+2019-03-17 14:39:50 [__main__-20202] ERROR: testing error logging
+2019-03-17 14:39:50 [__main__-20201] WARNING: testing warning logging
+2019-03-17 14:39:50 [__main__-20204] ERROR: testing error logging
+2019-03-17 14:39:51 [__main__-20200] INFO: testing info logging
+2019-03-17 14:39:51 [__main__-20205] ERROR: testing error logging
+2019-03-17 14:39:51 [__main__-20202] ERROR: testing error logging
+2019-03-17 14:39:51 [__main__-20200] ERROR: testing error logging
+2019-03-17 14:39:51 [__main__-20202] ERROR: testing error logging
+2019-03-17 14:39:51 [__main__-20204] ERROR: testing error logging
+2019-03-17 14:39:51 [__main__-20205] INFO: testing info logging
+2019-03-17 14:39:51 [__main__-20204] INFO: testing info logging
+2019-03-17 14:39:51 [__main__-20201] ERROR: testing error logging
+2019-03-17 14:39:51 [__main__-20202] ERROR: testing error logging
+2019-03-17 14:39:52 [__main__-20204] ERROR: testing error logging
+2019-03-17 14:39:52 [__main__-20205] INFO: testing info logging
+2019-03-17 14:39:52 [__main__-20200] ERROR: testing error logging
+2019-03-17 14:39:52 [__main__-20201] ERROR: testing error logging
+2019-03-17 14:39:52 [__main__-20200] ERROR: testing error logging
+2019-03-17 14:39:52 [__main__-20202] WARNING: testing warning logging
+20205 done
+20204 done
+20201 done
+20200 done
+20202 done
+all processes exited
+
++--------------------------------------------------------------------------
+|   startlog.MultiprocessHandler in combination with starlog.StatusHandler
++--------------------------------------------------------------------------
+
+configuring logging
+using logging_multiprocess_status.conf
+starting main loop
+2019-03-17 14:39:54 log messages: 3 ERROR, 7 WARNING 4 INFO. Requests: 4
+2019-03-17 14:39:55 log messages: 3 ERROR, 1 WARNING 2 INFO. Requests: 2
+2019-03-17 14:39:56 log messages: 5 ERROR, 4 WARNING 2 INFO. Requests: 2
+2019-03-17 14:39:57 log messages: 0 ERROR, 5 WARNING 4 INFO. Requests: 4
+2019-03-17 14:39:58 log messages: 3 ERROR, 3 WARNING 2 INFO. Requests: 2
+20234 done
+20232 done
+20230 done
+20237 done
+20231 done
+all processes exited
+
++--------------------------------------------------------------------------
+|   startlog.ZmqHandler
++--------------------------------------------------------------------------
+
+configuring logging
+using logging_zmq.conf
+starting main loop
+2019-03-17 14:39:59 [__main__-20257] INFO: testing info logging
+2019-03-17 14:39:59 [__main__-20256] WARNING: testing warning logging
+2019-03-17 14:39:59 [__main__-20258] ERROR: testing error logging
+2019-03-17 14:39:59 [__main__-20259] ERROR: testing error logging
+2019-03-17 14:39:59 [__main__-20260] ERROR: testing error logging
+2019-03-17 14:39:59 [__main__-20257] WARNING: testing warning logging
+2019-03-17 14:39:59 [__main__-20256] INFO: testing info logging
+2019-03-17 14:39:59 [__main__-20259] INFO: testing info logging
+2019-03-17 14:39:59 [__main__-20259] INFO: testing info logging
+2019-03-17 14:40:00 [__main__-20259] INFO: testing info logging
+2019-03-17 14:40:00 [__main__-20260] WARNING: testing warning logging
+2019-03-17 14:40:00 [__main__-20257] INFO: testing info logging
+2019-03-17 14:40:00 [__main__-20258] WARNING: testing warning logging
+2019-03-17 14:40:00 [__main__-20256] ERROR: testing error logging
+2019-03-17 14:40:01 [__main__-20259] INFO: testing info logging
+2019-03-17 14:40:01 [__main__-20260] WARNING: testing warning logging
+2019-03-17 14:40:01 [__main__-20257] INFO: testing info logging
+2019-03-17 14:40:01 [__main__-20260] INFO: testing info logging
+2019-03-17 14:40:01 [__main__-20258] ERROR: testing error logging
+2019-03-17 14:40:01 [__main__-20259] ERROR: testing error logging
+2019-03-17 14:40:01 [__main__-20256] INFO: testing info logging
+2019-03-17 14:40:01 [__main__-20260] ERROR: testing error logging
+2019-03-17 14:40:01 [__main__-20260] INFO: testing info logging
+2019-03-17 14:40:01 [__main__-20256] INFO: testing info logging
+2019-03-17 14:40:02 [__main__-20257] WARNING: testing warning logging
+2019-03-17 14:40:02 [__main__-20259] WARNING: testing warning logging
+2019-03-17 14:40:02 [__main__-20258] ERROR: testing error logging
+2019-03-17 14:40:02 [__main__-20259] ERROR: testing error logging
+2019-03-17 14:40:02 [__main__-20259] ERROR: testing error logging
+2019-03-17 14:40:02 [__main__-20256] WARNING: testing warning logging
+2019-03-17 14:40:02 [__main__-20258] INFO: testing info logging
+2019-03-17 14:40:02 [__main__-20260] INFO: testing info logging
+2019-03-17 14:40:02 [__main__-20257] ERROR: testing error logging
+2019-03-17 14:40:02 [__main__-20257] ERROR: testing error logging
+2019-03-17 14:40:02 [__main__-20256] INFO: testing info logging
+2019-03-17 14:40:03 [__main__-20256] INFO: testing info logging
+2019-03-17 14:40:03 [__main__-20258] INFO: testing info logging
+2019-03-17 14:40:03 [__main__-20260] WARNING: testing warning logging
+2019-03-17 14:40:03 [__main__-20259] WARNING: testing warning logging
+2019-03-17 14:40:03 [__main__-20260] ERROR: testing error logging
+2019-03-17 14:40:03 [__main__-20257] ERROR: testing error logging
+2019-03-17 14:40:04 [__main__-20256] INFO: testing info logging
+2019-03-17 14:40:04 [__main__-20258] ERROR: testing error logging
+2019-03-17 14:40:04 [__main__-20260] WARNING: testing warning logging
+2019-03-17 14:40:04 [__main__-20259] ERROR: testing error logging
+2019-03-17 14:40:04 [__main__-20258] ERROR: testing error logging
+2019-03-17 14:40:04 [__main__-20257] INFO: testing info logging
+2019-03-17 14:40:04 [__main__-20260] WARNING: testing warning logging
+20260 done
+20256 done
+20259 done
+20257 done
+20258 done
+all processes exited
+
++--------------------------------------------------------------------------
+|   startlog.ZmqHandler in combination with starlog.StatusHandler
++--------------------------------------------------------------------------
+
+configuring logging
+using logging_multiprocess_status.conf
+starting main loop
+2019-03-17 14:40:06 log messages: 3 ERROR, 8 WARNING 7 INFO. Requests: 7
+2019-03-17 14:40:07 log messages: 4 ERROR, 3 WARNING 3 INFO. Requests: 3
+2019-03-17 14:40:08 log messages: 4 ERROR, 2 WARNING 3 INFO. Requests: 3
+2019-03-17 14:40:09 log messages: 3 ERROR, 6 WARNING 2 INFO. Requests: 2
+2019-03-17 14:40:10 log messages: 5 ERROR, 2 WARNING 4 INFO. Requests: 4
+20280 done
+20279 done
+20281 done
+20283 done
+20285 done
+all processes exited

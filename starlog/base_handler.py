@@ -17,12 +17,12 @@ class BaseMultiprocessHandler(logging.Handler):
         the logger ``starlog.logsink`` or whatever was passed to the ``logger``
         parameter at instantiation of the MultiprocessHandler.
         """
-        if self._is_master_process():
+        if self._is_main_process():
             self.forward_to_sink(record)
         else:
-            self.forward_to_master(record)
+            self.forward_to_main(record)
 
-    def _is_master_process(self):
+    def _is_main_process(self):
         return self._parent_pid == os.getpid()
 
     def forward_to_sink(self, record):
@@ -33,5 +33,5 @@ class BaseMultiprocessHandler(logging.Handler):
 
         self._sink_logger.handle(record)
 
-    def forward_to_master(self, record):
+    def forward_to_main(self, record):
         raise NotImplementedError()

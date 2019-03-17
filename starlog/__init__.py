@@ -11,16 +11,16 @@ def replace_callable_with_import_error(message):
 
 
 try:
-    from .zmq_handler import ZmqPushPullHandler
+    from .zmq_handler import ZmqHandler
 except ImportError as error:
     message = '%s. Please install "starlog[zmq]"' % (error, )
-    ZmqPushPullHandler = replace_callable_with_import_error(message)
+    ZmqHandler = replace_callable_with_import_error(message)
 
 
 __all__ = [
     'MultiprocessHandler',
     'StatusHandler',
-    'ZmqPushPullHandler',
+    'ZmqHandler',
     'inc',
     'log_to_stderr',
     ]
