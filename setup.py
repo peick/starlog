@@ -6,7 +6,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 long_description = open(os.path.join(here, 'README.md')).read()
 
 setup(name='starlog',
-      version='1.0.0a3',
+      version='1.0.0a4',
       description='Advanced logging features.',
       author='Michael Peick',
       author_email='michael.peick+starlog@gmail.com',
@@ -16,6 +16,7 @@ setup(name='starlog',
       long_description_content_type='text/markdown',
       keywords=['logging', 'log handler', 'status logging',
                 'multiprocessing', 'zmq'],
+      packages=['starlog'],
       install_requires=[
           'six',
       ],
