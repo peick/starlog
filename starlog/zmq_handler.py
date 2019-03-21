@@ -1,5 +1,6 @@
 import errno
 import os
+import re
 import threading
 import traceback
 from logging import makeLogRecord
@@ -17,6 +18,16 @@ _log = get_debug_logger('starlog.debug.zmq_handler')
 
 class BindFailedError(Exception):
     pass
+
+
+def _requires_random_bind(address):
+    if not address.startswith('tcp://'):
+        return False
+
+    if re.search(r':\d+$', address):
+        return False
+    else:
+        return True
 
 
 class RobustZmqSocket(object):
@@ -84,7 +95,11 @@ class RobustZmqSocket(object):
             context = self._obtain_context()
             self._socket = context.socket(self._socket_type)
 
-            self._socket.bind(self._address)
+            if _requires_random_bind(self._address):
+                port = self._socket.bind_to_random_port(self._address)
+                self._address = '%s:%d' % (self._address, port)
+            else:
+                self._socket.bind(self._address)
 
             self._set_socket_options()
         except zmq.ZMQError as error:
@@ -128,7 +143,7 @@ class RobustZmqSocket(object):
             return self._socket.send_json(data)
 
     def close(self):
-        """Close the zmq socket and destroy context.
+        """Close the zmq socket and destroy the zmq context.
         """
         self.close_socket()
         self.destroy_context()
@@ -149,6 +164,11 @@ class RobustZmqSocket(object):
                 self._socket.close()
             self._socket = None
 
+    @property
+    def address(self):
+        assert not _requires_random_bind(self._address)
+        return self._address
+
 
 class ZmqHandler(BaseMultiprocessHandler):
     """The ZmqHandler creates a zmq connection between the main
@@ -165,7 +185,9 @@ class ZmqHandler(BaseMultiprocessHandler):
 
     :param str address: the address of the connection which is passed to
         :py:meth:`zmq.Socket.connect` / :py:meth:`zmq.Socket.bind`.
-        Examples: ``tcp://127.0.0.1:12345``, ``ipc:///tmp/log.sock``
+        Examples: ``tcp://127.0.0.1:12345``, ``tcp://127.0.0.1``,
+        ``ipc:///tmp/log.sock``. Omitting the port in a ``tcp://`` address
+        will bind the socket to a random port.
     :param str logger: name of the logger where log records are send to in the
         main process.
     """
@@ -185,8 +207,26 @@ class ZmqHandler(BaseMultiprocessHandler):
 
     def _start_listener_thread(self, address):
         _log.info('ZmqHandler._start_listener_thread')
-        listener = ZmqListenerThread(self._receiver_socket_type, address, self)
+
+        event = threading.Event()
+        listener = ZmqListenerThread(self._receiver_socket_type, address,
+                                     event, self)
         listener.start()
+
+        # wait until the socket is bound in the listener
+        for i in range(60):
+            event.wait(1)
+            if event.is_set():
+                break
+
+            if not listener.is_alive():
+                break
+
+        if not event.is_set():
+            raise Exception('Listener thread could not be created')
+
+        self._address = listener.get_address()
+
         return listener
 
     def forward_to_main(self, record):
@@ -240,10 +280,11 @@ class ZmqHandler(BaseMultiprocessHandler):
 
 
 class ZmqListenerThread(threading.Thread):
-    def __init__(self, socket_type, address, handler, *args, **kwargs):
+    def __init__(self, socket_type, address, event, handler, *args, **kwargs):
         super(ZmqListenerThread, self).__init__(*args, **kwargs)
         self.setDaemon(True)
 
+        self._event = event
         self._handler = handler
         self._running = True
 
@@ -256,6 +297,8 @@ class ZmqListenerThread(threading.Thread):
     def run(self):
         try:
             self._zmq_socket.bind()
+            self._event.set()
+            self._event = None
 
             while self._running:
                 record_dict = self._zmq_socket.recv_json()
@@ -277,6 +320,9 @@ class ZmqListenerThread(threading.Thread):
     def _process_record(self, record_dict):
         record = makeLogRecord(record_dict)
         self._handler.forward_to_sink(record)
+
+    def get_address(self):
+        return self._zmq_socket.address
 
     def close(self):
         """Close the zmq socket connection.

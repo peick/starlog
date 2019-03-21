@@ -22,7 +22,7 @@ def _random_log_entry():
         _log.info('testing info logging',
                   extra=inc('requests').inc('foo').update({'OTHER': True}))
     if level == 'warning':
-        _log.warn('testing warning logging')
+        _log.warning('testing warning logging')
     if level == 'error':
         _log.error('testing error logging')
 
