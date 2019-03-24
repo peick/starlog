@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import find_packages, setup
 
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -16,7 +16,7 @@ setup(name='starlog',
       long_description_content_type='text/markdown',
       keywords=['logging', 'log handler', 'status logging',
                 'multiprocessing', 'zmq'],
-      packages=['starlog'],
+      packages=find_packages(),
       install_requires=[
           'six',
       ],
