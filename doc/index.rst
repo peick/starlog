@@ -18,6 +18,7 @@ Installation::
 
    status_handler
    multiprocess_handler
+   lookback_handler
    examples
 
 Indices and tables

@@ -55,3 +55,11 @@ all_records = [
     more_metrics_record,
     plain_record,
     ]
+
+
+def make_thread_process_record(thread, process, level):
+    return makeLogRecord({
+        'levelno': level,
+        'thread': thread,
+        'process': process,
+    })

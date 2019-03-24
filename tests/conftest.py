@@ -18,12 +18,15 @@ def logged_records():
 
 
 @pytest.fixture(scope='function')
-def status_sink_logger(logged_records):
-    # fyi: 'starlog.status' is the default logger for starlog.StatusHandler
-    handler = BufferingHandler(logged_records)
+def target_handler(logged_records):
+    return BufferingHandler(logged_records)
 
+
+@pytest.fixture(scope='function')
+def status_sink_logger(target_handler):
+    # fyi: 'starlog.status' is the default logger for starlog.StatusHandler
     logger = logging.getLogger('starlog.status')
-    logger.addHandler(handler)
+    logger.addHandler(target_handler)
     logger.setLevel(logging.DEBUG)
     logger.propagate = False
 
@@ -31,13 +34,11 @@ def status_sink_logger(logged_records):
 
 
 @pytest.fixture(scope='function')
-def sink_logger(logged_records):
+def sink_logger(target_handler):
     # fyi: 'starlog.logsink' is the default logger for
     # starlog.MultiprocessHandler
-    handler = BufferingHandler(logged_records)
-
     logger = logging.getLogger('starlog.logsink')
-    logger.addHandler(handler)
+    logger.addHandler(target_handler)
     logger.setLevel(logging.DEBUG)
     logger.propagate = False
 
