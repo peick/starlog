@@ -1,5 +1,6 @@
-from collections import defaultdict
 import logging.handlers
+import time
+from collections import defaultdict
 
 import six
 
@@ -12,9 +13,10 @@ class LookbackHandler(logging.handlers.MemoryHandler):
     When the buffer is full, logging records of lower severity levels are
     dropped.
     """
-    def __init__(self, *args, **kwargs):
-        logging.handlers.MemoryHandler.__init__(self, *args, **kwargs)
+    def __init__(self, capacity, max_age=3600, **kwargs):
+        logging.handlers.MemoryHandler.__init__(self, capacity, **kwargs)
         self.buffer = defaultdict(list)
+        self.max_age = max_age
 
     def key(self, record):
         """Key of the record to identify the sub buffer. It returns
@@ -33,19 +35,20 @@ class LookbackHandler(logging.handlers.MemoryHandler):
         Append the record. If shouldFlush() tells us to, call
         flush_sub_buffer() to process the buffer.
         """
+        self.trim()
+
         key = self.key(record)
         sub_buffer = self.buffer[key]
         sub_buffer.append(record)
         if self.shouldFlush(record):
             self.flush_sub_buffer(sub_buffer)
-        self.trim(sub_buffer)
 
     def flush(self):
         """Flush all sub buffers.
         """
+        self.trim()
         for records in six.itervalues(self.buffer):
             self.flush_sub_buffer(records)
-            self.trim(records)
 
     def flush_sub_buffer(self, records):
         """Sends buffered records of the thread/process record buffer to the
@@ -71,9 +74,33 @@ class LookbackHandler(logging.handlers.MemoryHandler):
         finally:
             self.release()
 
-    def trim(self, records):
+    def trim(self):
+        """Deletes buffered logging records reaching the buffer capacity.
+        Also deletes logging records older than ``max_age``.
+        """
+        now = time.time()
+
         self.acquire()
         try:
-            del records[:-self.capacity]
+            keys_to_delete = []
+
+            for key, records in six.iteritems(self.buffer):
+                del records[:-self.capacity]
+
+                # drop old messages
+                index = 0
+                while index < len(records):
+                    record = records[index]
+                    if record.created and now - record.created > self.max_age:
+                        del records[index]
+                    else:
+                        index += 1
+
+                if len(records) == 0:
+                    keys_to_delete.append(key)
+
+            for key in keys_to_delete:
+                del self.buffer[key]
+
         finally:
             self.release()
