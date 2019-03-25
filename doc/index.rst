@@ -8,9 +8,17 @@ Highlights:
 - :doc:`status_handler`: log status lines in regular intervals
 - :doc:`multiprocess_handler` bubble up messages of sub-processes to the main process when you need to deal with multiple processes
 
-Installation::
+Installation of the latest stable version::
+
+    pip install 'starlog[zmq]'
+
+Installation of the latest pre-release / developer version::
 
     pip install --pre 'starlog[zmq]'
+
+Installation of the latest pre-release / developer version from git::
+
+    pip install 'git+https://gitlab.com/peick/starlog#egg=starlog[zmq]'
 
 .. toctree::
    :maxdepth: 2
