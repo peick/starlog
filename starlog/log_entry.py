@@ -16,11 +16,29 @@ class Extra(object):
         self._dic[EXTRA_KEY][metric_key] = value
         return self
 
+    def keys(self):
+        return self._dic.keys()
+
+    def values(self):
+        return self._dic.values()
+
     def items(self):
         return self._dic.items()
 
+    def iterkeys(self):
+        return self._dic.iterkeys()
+
+    def itervalues(self):
+        return self._dic.itervalues()
+
+    def iteritems(self):
+        return self._dic.iteritems()
+
+    def __getitem__(self, key):
+        return self._dic[key]
+
     def __iter__(self):
-        return iter(self.items())
+        return iter(self._dic)
 
 
 def inc(metric_key, value=1, dic=None):

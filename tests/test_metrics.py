@@ -68,4 +68,3 @@ def test_metric_collection_inc_multiple_counter():
     result = coll.get_all_and_reset()
     assert result == {'reqs': 0, 'reqs.avg': 0,
                       'users': 0, 'users.avg': 0}
-
