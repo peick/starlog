@@ -7,10 +7,10 @@ from logging import makeLogRecord
 
 import zmq
 
+from ..debug import get_debug_logger
+from ..serializer import record_to_dict
+from ..utils import retry, RetryAbortedByCheck
 from .base_handler import BaseMultiprocessHandler
-from .debug import get_debug_logger
-from .serializer import record_to_dict
-from .utils import retry, RetryAbortedByCheck
 
 
 _log = get_debug_logger('starlog.debug.zmq_handler')

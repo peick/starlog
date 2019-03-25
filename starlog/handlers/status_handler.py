@@ -42,9 +42,9 @@ import traceback
 import warnings
 from collections import defaultdict
 
-from .debug import get_debug_logger
-from .log_entry import get_log_record_metric
-from .metrics import MetricCollection
+from ..debug import get_debug_logger
+from ..log_entry import get_log_record_metric
+from ..metrics import MetricCollection
 
 
 metric_collection = MetricCollection()

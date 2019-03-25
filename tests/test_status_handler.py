@@ -4,7 +4,7 @@ import warnings
 import pytest
 
 from starlog import StatusHandler
-from starlog.status_handler import ReportLogRecord
+from starlog.handlers.status_handler import ReportLogRecord
 from .records import all_records, plain_record
 
 

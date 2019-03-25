@@ -4,7 +4,7 @@ import flexmock
 import pytest
 import zmq
 
-from starlog.zmq_handler import (
+from starlog.handlers.zmq_handler import (
     BindFailedError, RobustZmqSocket, ZmqListenerThread)
 from starlog import utils
 

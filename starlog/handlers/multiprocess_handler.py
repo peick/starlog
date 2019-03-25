@@ -2,10 +2,10 @@ import multiprocessing
 import threading
 import traceback
 
+from ..compat import QueueHandler
+from ..debug import get_debug_logger
+from ..utils import sleep
 from .base_handler import BaseMultiprocessHandler
-from .compat import QueueHandler
-from .debug import get_debug_logger
-from .utils import sleep
 
 
 _log = get_debug_logger('starlog.debug.queue_handler')

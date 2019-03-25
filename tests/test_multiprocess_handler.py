@@ -6,7 +6,7 @@ from multiprocessing import Process, Queue
 import flexmock
 import pytest
 
-from starlog.multiprocess_handler import QueueListenerThread
+from starlog.handlers.multiprocess_handler import QueueListenerThread
 from starlog import MultiprocessHandler
 from .records import plain_record
 
