@@ -35,6 +35,23 @@ code/logging_zmq.conf
 .. literalinclude:: code/logging_zmq.conf
    :language: ini
 
+Lookback Handler
+----------------
+
+Execute with ``python doc/code/demo_lookback.py``
+
+code/demo_lookback_handler.py
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: code/demo_lookback_handler.py
+   :language: python
+
+code/logging_lookback.conf
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: code/logging_lookback.conf
+   :language: ini
+
 gunicorn demo
 -------------
 
