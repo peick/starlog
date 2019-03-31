@@ -9,7 +9,7 @@ import zmq
 
 from ..debug import get_debug_logger
 from ..serializer import record_to_dict
-from ..utils import retry, RetryAbortedByCheck
+from ..utils import retry, wait_for_event, RetryAbortedByCheck
 from .base_handler import BaseMultiprocessHandler
 
 
@@ -214,16 +214,7 @@ class ZmqHandler(BaseMultiprocessHandler):
         listener.start()
 
         # wait until the socket is bound in the listener
-        for i in range(60):
-            event.wait(1)
-            if event.is_set():
-                break
-
-            if not listener.is_alive():
-                break
-
-        if not event.is_set():
-            raise Exception('Listener thread could not be created')
+        wait_for_event(event, 60, listener.is_alive)
 
         self._address = listener.get_address()
 
@@ -240,12 +231,12 @@ class ZmqHandler(BaseMultiprocessHandler):
         if self._pid != pid:
             # pid is None: new child forked from main
             # pid != os.getpid(): new child forked from other child
-            self._client_bind_to_socket()
+            self._client_connect_to_socket()
             self._pid = pid
 
         return self._socket
 
-    def _client_bind_to_socket(self):
+    def _client_connect_to_socket(self):
         socket = RobustZmqSocket(self._sender_socket_type, self._address)
         socket.connect()
 

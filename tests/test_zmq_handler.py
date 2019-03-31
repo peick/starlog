@@ -1,4 +1,5 @@
 import errno
+import threading
 
 import flexmock
 import pytest
@@ -19,26 +20,27 @@ def dummy_zmq_handler():
 
 @pytest.fixture(scope='function')
 def listener():
-    return ZmqListenerThread(address, dummy_zmq_handler)
+    event = threading.Event()
+    return ZmqListenerThread(zmq.PULL, address, event, dummy_zmq_handler)
 
 
 @pytest.fixture(scope='function')
-def socket():
+def receiver_socket():
     return RobustZmqSocket(zmq.PULL, address)
 
 
-def test_robust_zmq_socket_bind_success_on_first_trial(socket):
+def test_robust_zmq_socket_bind_success_on_first_trial(receiver_socket):
     zmq_mock_socket = flexmock(closed=False, close=lambda: None)
 
     flexmock(zmq.Context).should_receive('socket') \
         .and_return(zmq_mock_socket)
     zmq_mock_socket.should_receive('bind').once()
 
-    socket.bind()
-    socket.close()
+    receiver_socket.bind()
+    receiver_socket.close()
 
 
-def test_robust_zmq_socket_bind_failed_unrecoverable(socket):
+def test_robust_zmq_socket_bind_failed_unrecoverable(receiver_socket):
     zmq_mock_socket = flexmock(closed=True)
 
     flexmock(zmq.Context).should_receive('socket') \
@@ -48,10 +50,10 @@ def test_robust_zmq_socket_bind_failed_unrecoverable(socket):
         .once()
 
     with pytest.raises(BindFailedError):
-        socket.bind()
+        receiver_socket.bind()
 
 
-def test_robust_zmq_socket_bind_failed_after_retries(socket):
+def test_robust_zmq_socket_bind_failed_after_retries(receiver_socket):
     zmq_mock_socket = flexmock(closed=True)
 
     flexmock(zmq.Context).should_receive('socket') \
@@ -62,10 +64,10 @@ def test_robust_zmq_socket_bind_failed_after_retries(socket):
     flexmock(utils).should_receive('sleep')
 
     with pytest.raises(zmq.ZMQError):
-        socket.bind()
+        receiver_socket.bind()
 
 
-def test_robust_zmq_socket_bind_success_after_retries(socket):
+def test_robust_zmq_socket_bind_success_after_retries(receiver_socket):
     zmq_mock_socket = flexmock(closed=True)
 
     flexmock(zmq.Context).should_receive('socket') \
@@ -77,11 +79,5 @@ def test_robust_zmq_socket_bind_success_after_retries(socket):
 
     flexmock(utils).should_receive('sleep')
 
-    socket.bind()
-    socket.close()
-
-
-# def test_zmq_listener_forward_log_message(listener, dummy_zmq_handler):
-#     listener.start()
-#     listener.shutdown()
-#     listener.join()
+    receiver_socket.bind()
+    receiver_socket.close()

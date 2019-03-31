@@ -63,3 +63,22 @@ def retry(exceptions=Exception, tries=3, backoff_factor=1, check=None,
         return deco
 
     return wrap
+
+
+def wait_for_event(event, duration, check, step=0.1):
+    def f():
+        if event.is_set():
+            return True
+
+        event.wait(step)
+
+        if event.is_set():
+            return True
+
+        if not check():
+            return True
+
+    sleep(duration, check=f, step=0.01)
+
+    if not event.is_set():
+        raise Exception('Listener thread could not be created')
