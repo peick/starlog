@@ -1,4 +1,5 @@
 import logging
+import time
 
 from starlog import inc
 
@@ -14,6 +15,11 @@ def makeLogRecord(dic, name='example.pkg', level=logging.DEBUG,
 
 
 plain_record = makeLogRecord({})
+
+plain_old_record = makeLogRecord({})
+plain_old_record.created = time.time() - 3600
+
+plain_error_record = makeLogRecord({}, level=logging.ERROR)
 
 extra_field_record = makeLogRecord({'caller': 'joe'})
 

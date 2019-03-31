@@ -12,6 +12,11 @@ class LookbackHandler(logging.handlers.MemoryHandler):
 
     When the buffer is full, logging records of lower severity levels are
     dropped.
+
+    :param capacity: the number of logging records to buffer per thread/process
+    :param int max_age: the number of seconds after which logging records are
+        dropped
+    :param flushLevel: flush if a log record seen with this log level or higher
     """
     def __init__(self, capacity, max_age=3600, **kwargs):
         logging.handlers.MemoryHandler.__init__(self, capacity, **kwargs)
