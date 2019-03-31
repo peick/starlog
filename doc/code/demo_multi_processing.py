@@ -10,21 +10,22 @@ from argparse import ArgumentParser
 from starlog import inc
 
 
-_log = logging.getLogger(__name__)
-
 N = 5
 T = 5
 
 
 def _random_log_entry():
+    loggername = random.choice(['example', 'example.app', None])
+    logger = logging.getLogger(loggername)
+
     level = random.choice(['info', 'warning', 'error'])
     if level == 'info':
-        _log.info('testing info logging',
-                  extra=inc('requests').inc('foo').update({'OTHER': True}))
+        logger.info('testing info logging',
+                    extra=inc('requests').inc('foo').update({'OTHER': True}))
     if level == 'warning':
-        _log.warning('testing warning logging')
+        logger.warning('testing warning logging')
     if level == 'error':
-        _log.error('testing error logging')
+        logger.error('testing error logging')
 
 
 def log_process():
