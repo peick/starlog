@@ -7,7 +7,9 @@ import zmq
 
 from starlog.handlers.zmq_handler import (
     BindFailedError, RobustZmqSocket, ZmqListenerThread)
+from starlog.serializer import record_to_dict
 from starlog import utils
+from .records import plain_record
 
 
 address = 'tcp://127.0.0.1:34782'
@@ -19,14 +21,26 @@ def dummy_zmq_handler():
 
 
 @pytest.fixture(scope='function')
-def listener():
-    event = threading.Event()
+def event():
+    return threading.Event()
+
+
+@pytest.fixture(scope='function')
+def listener(event, dummy_zmq_handler):
     return ZmqListenerThread(zmq.PULL, address, event, dummy_zmq_handler)
 
 
 @pytest.fixture(scope='function')
-def receiver_socket():
-    return RobustZmqSocket(zmq.PULL, address)
+def receiver_socket(request):
+    socket = RobustZmqSocket(zmq.PULL, address)
+    request.addfinalizer(socket.close)
+
+    return socket
+
+
+@pytest.fixture(scope='function')
+def sender_socket():
+    return RobustZmqSocket(zmq.PUSH, address)
 
 
 def test_robust_zmq_socket_bind_success_on_first_trial(receiver_socket):
@@ -81,3 +95,20 @@ def test_robust_zmq_socket_bind_success_after_retries(receiver_socket):
 
     receiver_socket.bind()
     receiver_socket.close()
+
+
+def test_zmq_listener_forward_log_message(listener, event, sender_socket,
+                                          dummy_zmq_handler):
+    dummy_zmq_handler \
+        .should_receive('forward_to_sink') \
+        .once()
+
+    listener.start()
+    utils.wait_for_event(event, 3, listener.is_alive)
+
+    sender_socket.connect()
+    record = record_to_dict(plain_record)
+    sender_socket.send_json(record)
+
+    listener.shutdown()
+    listener.join()
