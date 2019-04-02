@@ -6,7 +6,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 long_description = open(os.path.join(here, 'README.md')).read()
 
 setup(name='starlog',
-      version='1.1.0a2',
+      version='1.1.0',
       description='Sophisticated logging handlers.',
       author='Michael Peick',
       author_email='michael.peick+starlog@gmail.com',
