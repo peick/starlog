@@ -7,7 +7,7 @@ long_description = open(os.path.join(here, 'README.md')).read()
 
 setup(name='starlog',
       version='1.1.0a2',
-      description='Advanced logging features.',
+      description='Sophisticated logging handlers.',
       author='Michael Peick',
       author_email='michael.peick+starlog@gmail.com',
       url='https://gitlab.com/peick/starlog',
@@ -26,11 +26,13 @@ setup(name='starlog',
           ],
       },
       classifiers=[
-          'Development Status :: 3 - Alpha',
+          'Development Status :: 4 - Beta',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: Implementation :: PyPy',
+          'Programming Language :: Python :: Implementation :: CPython',
           'Topic :: System :: Logging',
       ]
       )
