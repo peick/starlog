@@ -157,13 +157,18 @@ class StatusHandler(logging.Handler):
 
     def close(self):
         _log.info('StatusHandler.close')
+        reporter_thread = self._async_reporter
+        self._async_reporter = None
+
         logging.Handler.close(self)
 
-        reporter_thread = self._async_reporter
+        # prevent a deadlock
+        self.lock = None
 
         if reporter_thread is not None:
             reporter_thread.shutdown()
             reporter_thread.join()
+
 
 
 class ReportLogRecord(object):

@@ -24,9 +24,9 @@ copyright = '2019, Michael Peick'
 author = 'Michael Peick'
 
 # The short X.Y version
-version = '1.1.0'
+version = '1.1.1a1'
 # The full version, including alpha/beta/rc tags
-release = '1.1.0'
+release = '1.1.1a1'
 
 
 # -- General configuration ---------------------------------------------------
